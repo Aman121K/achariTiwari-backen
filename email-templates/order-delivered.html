@@ -1,0 +1,79 @@
+<!--
+Subject: Your Achari Tiwari order {{orderNumber}} has been delivered
+Preheader: Your jars have arrived. We hope they bring warmth to your meals.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Order Delivered</title>
+  </head>
+  <body style="margin:0; padding:0; background:#f7f1e7; font-family:Arial, Helvetica, sans-serif; color:#2b241b;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">Your jars have arrived. We hope they bring warmth to your meals.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f1e7;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; background:#fffaf2; border:1px solid #eadcc8; border-radius:18px; overflow:hidden;">
+            <tr>
+              <td style="background:#254d2b; padding:24px 30px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="font-size:26px; font-weight:700; color:#fffaf2;">Achari Tiwari</td>
+                    <td align="right" style="font-size:13px; color:#e9d6ac;">Delivered</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:42px 34px 18px;">
+                <p style="margin:0 0 12px; color:#c28a2c; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.6px;">Order delivered</p>
+                <h1 style="margin:0; font-family:Georgia, 'Times New Roman', serif; font-size:32px; line-height:1.18; color:#2b241b;">Your Achari Tiwari order has arrived.</h1>
+                <p style="margin:16px 0 0; font-size:16px; line-height:1.7; color:#5f5345;">Hi {{customerName}}, order {{orderNumber}} has been delivered. We hope every jar adds a familiar, homemade taste to your meals.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:10px 34px 26px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3eadb; border-radius:14px;">
+                  <tr>
+                    <td style="padding:20px;">
+                      <p style="margin:0 0 8px; font-size:15px; font-weight:700; color:#254d2b;">Storage tip</p>
+                      <p style="margin:0; font-size:14px; line-height:1.65; color:#5f5345;">Use a clean, dry spoon every time. Keep the jar lid closed tightly and store as mentioned on the product label for best freshness.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 34px 28px;">
+                <h2 style="margin:0 0 12px; font-size:18px; color:#2b241b;">Delivered items</h2>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                  {{#each items}}
+                  <tr>
+                    <td style="padding:14px 0; border-top:1px solid #eadcc8;">
+                      <p style="margin:0 0 4px; font-size:15px; font-weight:700; color:#2b241b;">{{productTitle}}</p>
+                      <p style="margin:0; font-size:13px; color:#7a6a59;">{{variantLabel}} - Qty {{quantity}}</p>
+                    </td>
+                    <td align="right" style="padding:14px 0; border-top:1px solid #eadcc8; font-size:13px; color:#7a6a59;">Delivered</td>
+                  </tr>
+                  {{/each}}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:2px 34px 40px;">
+                <a href="{{siteUrl}}" style="display:inline-block; background:#254d2b; color:#fffaf2; text-decoration:none; font-size:15px; font-weight:700; padding:15px 26px; border-radius:999px;">Shop again</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px 34px; background:#efe2cf; text-align:center;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#6b5d4d;">If anything does not look right, contact us at <a href="mailto:{{supportEmail}}" style="color:#254d2b; font-weight:700;">{{supportEmail}}</a></p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import { AppError } from '../middleware/errorHandler';
 import { AuthRequest } from '../middleware/auth';
+import { sendWelcomeEmail } from '../services/email';
 
 function signToken(user: { _id: unknown; role: string }) {
   return jwt.sign(
@@ -36,6 +37,7 @@ export const register = async (req: Request, res: Response) => {
     });
 
     await user.save();
+    sendWelcomeEmail({ name:user.name, email:user.email }).catch(error => console.error('Welcome email failed', error));
 
     // Generate JWT token
     const token = signToken(user);

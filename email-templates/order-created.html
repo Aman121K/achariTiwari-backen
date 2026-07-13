@@ -1,0 +1,113 @@
+<!--
+Subject: Your Achari Tiwari order {{orderNumber}} is confirmed
+Preheader: We received your order and are preparing your jars with care.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Order Confirmed</title>
+  </head>
+  <body style="margin:0; padding:0; background:#f7f1e7; font-family:Arial, Helvetica, sans-serif; color:#2b241b;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">We received your order and are preparing your jars with care.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f1e7;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:660px; background:#fffaf2; border:1px solid #eadcc8; border-radius:18px; overflow:hidden;">
+            <tr>
+              <td style="background:#254d2b; padding:24px 30px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="font-size:26px; font-weight:700; color:#fffaf2;">Achari Tiwari</td>
+                    <td align="right" style="font-size:13px; color:#e9d6ac;">Order {{orderNumber}}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:38px 34px 18px;">
+                <p style="margin:0 0 12px; color:#c28a2c; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.6px;">Order confirmed</p>
+                <h1 style="margin:0; font-family:Georgia, 'Times New Roman', serif; font-size:32px; line-height:1.18; color:#2b241b;">Thank you, {{customerName}}.</h1>
+                <p style="margin:16px 0 0; font-size:16px; line-height:1.7; color:#5f5345;">Your order has been received. Our team will check every jar, pack it securely and share updates as it moves ahead.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 34px 24px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3eadb; border-radius:14px;">
+                  <tr>
+                    <td style="padding:18px;">
+                      <p style="margin:0 0 4px; font-size:13px; color:#7a6a59;">Order number</p>
+                      <p style="margin:0; font-size:20px; font-weight:700; color:#254d2b;">{{orderNumber}}</p>
+                    </td>
+                    <td style="padding:18px;" align="right">
+                      <p style="margin:0 0 4px; font-size:13px; color:#7a6a59;">Order total</p>
+                      <p style="margin:0; font-size:20px; font-weight:700; color:#254d2b;">{{orderTotal}}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 34px 12px;">
+                <h2 style="margin:0 0 12px; font-size:18px; color:#2b241b;">Order summary</h2>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                  {{#each items}}
+                  <tr>
+                    <td style="padding:14px 0; border-top:1px solid #eadcc8;">
+                      <p style="margin:0 0 4px; font-size:15px; font-weight:700; color:#2b241b;">{{productTitle}}</p>
+                      <p style="margin:0; font-size:13px; color:#7a6a59;">{{variantLabel}} - {{size}} - Qty {{quantity}}</p>
+                    </td>
+                    <td align="right" style="padding:14px 0; border-top:1px solid #eadcc8; font-size:15px; font-weight:700; color:#2b241b;">{{lineTotal}}</td>
+                  </tr>
+                  {{/each}}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:8px 34px 22px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="font-size:14px; color:#6f6254;">Subtotal</td>
+                    <td align="right" style="font-size:14px; color:#2b241b;">{{subtotal}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding-top:8px; font-size:14px; color:#6f6254;">Shipping</td>
+                    <td align="right" style="padding-top:8px; font-size:14px; color:#2b241b;">{{shippingCharge}}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding-top:12px; font-size:17px; font-weight:700; color:#254d2b;">Total</td>
+                    <td align="right" style="padding-top:12px; font-size:17px; font-weight:700; color:#254d2b;">{{orderTotal}}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 34px 28px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#fff3df; border:1px solid #eadcc8; border-radius:14px;">
+                  <tr>
+                    <td style="padding:18px;">
+                      <p style="margin:0 0 8px; font-size:15px; font-weight:700; color:#2b241b;">Shipping to</p>
+                      <p style="margin:0; font-size:14px; line-height:1.65; color:#5f5345;">{{shippingName}}<br>{{shippingLine1}}{{#if shippingLine2}}, {{shippingLine2}}{{/if}}<br>{{shippingCity}}, {{shippingState}} {{postalCode}}<br>{{shippingCountry}}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:0 34px 40px;">
+                <a href="{{orderUrl}}" style="display:inline-block; background:#254d2b; color:#fffaf2; text-decoration:none; font-size:15px; font-weight:700; padding:15px 26px; border-radius:999px;">View order</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px 34px; background:#efe2cf; text-align:center;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#6b5d4d;">Questions about this order? Contact <a href="mailto:{{supportEmail}}" style="color:#254d2b; font-weight:700;">{{supportEmail}}</a></p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

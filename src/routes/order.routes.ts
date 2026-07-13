@@ -1,7 +1,7 @@
 import express from 'express';
 import Order from '../models/Order';
 import { authenticate, authorize, AuthRequest, optionalAuthenticate } from '../middleware/auth';
-import { sendOrderConfirmation } from '../services/email';
+import { sendOrderConfirmation, sendOrderDeliveredEmail } from '../services/email';
 import Product from '../models/Product';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
@@ -137,8 +137,10 @@ router.put('/:orderId', authenticate, authorize(['admin']), async (req, res, nex
   try {
     const allowed = ['status', 'paymentStatus', 'trackingNumber', 'notes'];
     const update = Object.fromEntries(Object.entries(req.body).filter(([key]) => allowed.includes(key)));
+    const previous = await Order.findById(req.params.orderId).select('status');
     const order = await Order.findByIdAndUpdate(req.params.orderId, update, { new: true, runValidators: true });
     if (!order) return res.status(404).json({ error: 'Order not found' });
+    if (order.status === 'delivered' && previous?.status !== 'delivered') sendOrderDeliveredEmail(order).catch(error => console.error('Delivery email failed', error));
     return res.json({ order });
   } catch (error) { return next(error); }
 });

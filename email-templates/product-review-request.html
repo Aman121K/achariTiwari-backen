@@ -1,0 +1,81 @@
+<!--
+Subject: How was your Achari Tiwari order?
+Preheader: Share your experience and help other customers choose their next jar.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Review Your Product</title>
+  </head>
+  <body style="margin:0; padding:0; background:#f7f1e7; font-family:Arial, Helvetica, sans-serif; color:#2b241b;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">Share your experience and help other customers choose their next jar.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f1e7;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; background:#fffaf2; border:1px solid #eadcc8; border-radius:18px; overflow:hidden;">
+            <tr>
+              <td style="background:#254d2b; padding:24px 30px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td style="font-size:26px; font-weight:700; color:#fffaf2;">Achari Tiwari</td>
+                    <td align="right" style="font-size:13px; color:#e9d6ac;">Your feedback matters</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:42px 34px 18px;">
+                <p style="margin:0 0 12px; color:#c28a2c; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1.6px;">Product review</p>
+                <h1 style="margin:0; font-family:Georgia, 'Times New Roman', serif; font-size:32px; line-height:1.18; color:#2b241b;">How did your jars taste?</h1>
+                <p style="margin:16px 0 0; font-size:16px; line-height:1.7; color:#5f5345;">Hi {{customerName}}, we hope your Achari Tiwari order brought the right balance of spice, tang and homemade comfort. Your review helps us improve and helps other customers choose with confidence.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:10px 34px 24px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3eadb; border-radius:14px;">
+                  <tr>
+                    <td align="center" style="padding:22px;">
+                      <p style="margin:0 0 10px; font-size:28px; letter-spacing:4px; color:#c28a2c;">* * * * *</p>
+                      <p style="margin:0; font-size:14px; line-height:1.65; color:#5f5345;">A short review takes less than a minute and means a lot to a small-batch brand like ours.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 34px 28px;">
+                <h2 style="margin:0 0 12px; font-size:18px; color:#2b241b;">Products from your order</h2>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+                  {{#each items}}
+                  <tr>
+                    <td style="padding:14px 0; border-top:1px solid #eadcc8;">
+                      <p style="margin:0 0 4px; font-size:15px; font-weight:700; color:#2b241b;">{{productTitle}}</p>
+                      <p style="margin:0; font-size:13px; color:#7a6a59;">{{variantLabel}} - {{size}}</p>
+                    </td>
+                    <td align="right" style="padding:14px 0; border-top:1px solid #eadcc8;">
+                      <a href="{{reviewUrl}}" style="font-size:13px; font-weight:700; color:#254d2b; text-decoration:none;">Review</a>
+                    </td>
+                  </tr>
+                  {{/each}}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:2px 34px 40px;">
+                <a href="{{reviewUrl}}" style="display:inline-block; background:#254d2b; color:#fffaf2; text-decoration:none; font-size:15px; font-weight:700; padding:15px 26px; border-radius:999px;">Write a review</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px 34px; background:#efe2cf; text-align:center;">
+                <p style="margin:0; font-size:13px; line-height:1.6; color:#6b5d4d;">Thank you for supporting Achari Tiwari. For help, write to <a href="mailto:{{supportEmail}}" style="color:#254d2b; font-weight:700;">{{supportEmail}}</a></p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
