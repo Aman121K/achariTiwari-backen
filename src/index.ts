@@ -20,7 +20,8 @@ const PORT =  5002;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || '*',
+  // Reflect the requesting origin so credentialed requests work from any domain.
+  origin: true,
   credentials: true,
 }));
 app.use(express.json());
