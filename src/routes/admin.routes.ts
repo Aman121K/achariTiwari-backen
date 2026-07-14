@@ -6,8 +6,14 @@ import Order from '../models/Order';
 import Product from '../models/Product';
 import User from '../models/User';
 import Category from '../models/Category';
+import { isValidObjectId, validateObjectIdParam } from '../middleware/validateObjectId';
+import Cart from '../models/Cart';
 
 const router = express.Router();
+router.param('id', validateObjectIdParam);
+router.param('orderId', validateObjectIdParam);
+router.param('productId', validateObjectIdParam);
+router.param('reviewId', validateObjectIdParam);
 
 router.use(authenticate);
 router.use(authorize(['admin']));
@@ -30,6 +36,14 @@ router.get('/orders', async (_req, res, next) => {
   }
 });
 
+router.get('/carts', async (req, res, next) => {
+  try {
+    const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 250);
+    const carts = await Cart.find().populate('userId', 'name email phone').sort({ lastActivityAt: -1 }).limit(limit).lean();
+    res.json({ carts });
+  } catch (error) { next(error); }
+});
+
 router.get('/categories', async (_req, res, next) => {
   try { res.json({ categories: await Category.find().populate('parentCategory', 'name slug').sort({ parentCategory: 1, name: 1 }) }); }
   catch (error) { next(error); }
@@ -38,6 +52,7 @@ router.get('/categories', async (_req, res, next) => {
 router.post('/categories', async (req, res, next) => {
   try {
     const parentCategory = req.body.parentCategory || null;
+    if (parentCategory && !isValidObjectId(parentCategory)) return res.status(400).json({ error: 'Select a valid top-level parent category.' });
     if (parentCategory && !(await Category.exists({ _id: parentCategory, parentCategory: null }))) return res.status(400).json({ error: 'Select a valid top-level parent category.' });
     const category = await Category.create({ ...req.body, parentCategory });
     return res.status(201).json({ category });
@@ -47,6 +62,7 @@ router.post('/categories', async (req, res, next) => {
 router.put('/categories/:id', async (req, res, next) => {
   try {
     const parentCategory = req.body.parentCategory || null;
+    if (parentCategory && !isValidObjectId(parentCategory)) return res.status(400).json({ error: 'Select a valid top-level parent category.' });
     if (parentCategory === req.params.id) return res.status(400).json({ error: 'A category cannot be its own parent.' });
     if (parentCategory && !(await Category.exists({ _id: parentCategory, parentCategory: null }))) return res.status(400).json({ error: 'Select a valid top-level parent category.' });
     const category = await Category.findByIdAndUpdate(req.params.id, { ...req.body, parentCategory }, { new: true, runValidators: true });

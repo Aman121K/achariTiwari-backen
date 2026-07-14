@@ -5,8 +5,11 @@ import { sendOrderConfirmation, sendOrderDeliveredEmail } from '../services/emai
 import Product from '../models/Product';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
+import { validateObjectIdParam } from '../middleware/validateObjectId';
+import Cart from '../models/Cart';
 
 const router = express.Router();
+router.param('orderId', validateObjectIdParam);
 
 const storefrontCatalog: Record<string, { name: string; price: number }> = {
   '1': { name: 'Premium Red Chili Aachar', price: 299 }, '2': { name: 'Traditional Mango Aachar', price: 349 },
@@ -30,7 +33,7 @@ const hashGuestToken = (token: string) => crypto.createHash('sha256').update(tok
 // Guest checkout: no account or authentication is required.
 router.post('/', optionalAuthenticate, async (req: AuthRequest, res, next) => {
   try {
-    const { customer, shippingAddress, items, paymentMethod = 'cash_on_delivery', notes = '' } = req.body;
+    const { customer, shippingAddress, items, paymentMethod = 'cash_on_delivery', notes = '', cartSessionId } = req.body;
     if (!customer?.name || !/^\S+@\S+\.\S+$/.test(customer.email || '') || !customer?.phone) {
       res.status(400).json({ error: 'Valid customer contact details are required.' });
       return;
@@ -88,6 +91,7 @@ router.post('/', optionalAuthenticate, async (req: AuthRequest, res, next) => {
       notes,
     });
     sendOrderConfirmation(order).catch((emailError) => console.error('Order email failed', emailError));
+    if (typeof cartSessionId === 'string') Cart.deleteOne({ sessionId: cartSessionId }).catch(error => console.error('Converted cart cleanup failed', error));
     res.status(201).json({ order, guestAccessToken });
   } catch (error) {
     next(error);

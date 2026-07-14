@@ -1,9 +1,15 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import { authenticate, authorize } from '../middleware/auth';
 import Product from '../models/Product';
 import Category from '../models/Category';
+import { isValidObjectId } from '../middleware/validateObjectId';
 
 const router = express.Router();
+
+function isValidProductId(id: string): boolean {
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+}
 
 function normalizeList(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -68,7 +74,8 @@ function normalizeProductPayload(body: any) {
 }
 
 async function hasValidCategorySelection(category: unknown, subCategory: unknown) {
-  if (!category) return false;
+  if (!isValidObjectId(category)) return false;
+  if (subCategory && !isValidObjectId(subCategory)) return false;
   const parent = await Category.exists({ _id: category, parentCategory: null, isActive: true });
   if (!parent) return false;
   if (!subCategory) return true;
@@ -93,6 +100,10 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
+    if (!isValidProductId(req.params.id)) {
+      res.status(400).json({ error: 'Invalid product ID' });
+      return;
+    }
     const product = await Product.findById(req.params.id).populate('category subCategory');
     if (!product) {
       res.status(404).json({ error: 'Product not found' });
@@ -106,6 +117,10 @@ router.get('/:id', async (req, res, next) => {
 
 router.get('/:id/reviews', async (req, res, next) => {
   try {
+    if (!isValidProductId(req.params.id)) {
+      res.status(400).json({ error: 'Invalid product ID' });
+      return;
+    }
     const product = await Product.findById(req.params.id).select('reviews rating');
     if (!product) return res.status(404).json({ error: 'Product not found' });
     const reviews = product.reviews.filter((review) => review.isApproved);
@@ -115,6 +130,10 @@ router.get('/:id/reviews', async (req, res, next) => {
 
 router.post('/:id/reviews', async (req, res, next) => {
   try {
+    if (!isValidProductId(req.params.id)) {
+      res.status(400).json({ error: 'Invalid product ID' });
+      return;
+    }
     const name = String(req.body.name || '').trim();
     const email = String(req.body.email || '').trim().toLowerCase();
     const rating = Number(req.body.rating);
@@ -145,6 +164,10 @@ router.post('/', authenticate, authorize(['admin']), async (req, res, next) => {
 
 router.put('/:id', authenticate, authorize(['admin']), async (req, res, next) => {
   try {
+    if (!isValidProductId(req.params.id)) {
+      res.status(400).json({ error: 'Invalid product ID' });
+      return;
+    }
     const payload = normalizeProductPayload(req.body);
     if (!payload.category) payload.category = (await Category.findOneAndUpdate({ slug: 'all-pickles' }, { $setOnInsert: { name: 'All Pickles', slug: 'all-pickles', description: 'All products', isActive: true } }, { new: true, upsert: true }))._id;
     if (!(await hasValidCategorySelection(payload.category, payload.subCategory))) {
@@ -169,6 +192,10 @@ router.put('/:id', authenticate, authorize(['admin']), async (req, res, next) =>
 
 router.delete('/:id', authenticate, authorize(['admin']), async (req, res, next) => {
   try {
+    if (!isValidProductId(req.params.id)) {
+      res.status(400).json({ error: 'Invalid product ID' });
+      return;
+    }
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) {
       res.status(404).json({ error: 'Product not found' });

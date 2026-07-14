@@ -3,8 +3,10 @@ import multer from 'multer';
 import { authenticate, authorize, AuthRequest } from '../middleware/auth';
 import MediaAsset from '../models/MediaAsset';
 import { deleteMedia, mediaStorageConfigured, uploadMedia } from '../services/media-storage';
+import { validateObjectIdParam } from '../middleware/validateObjectId';
 
 const router = express.Router();
+router.param('id', validateObjectIdParam);
 const allowedTypes = new Set(['image/jpeg','image/png','image/webp','image/gif','image/avif','application/pdf']);
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024, files: 1 }, fileFilter: (_req,file,done) => {
   if (!allowedTypes.has(file.mimetype)) { done(new Error('Only JPG, PNG, WebP, GIF, AVIF and PDF files are allowed.')); return; }

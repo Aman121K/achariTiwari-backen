@@ -1,8 +1,10 @@
 import express from 'express';
 import { authenticate, authorize, AuthRequest } from '../middleware/auth';
 import BlogPost from '../models/BlogPost';
+import { validateObjectIdParam } from '../middleware/validateObjectId';
 
 const router = express.Router();
+router.param('id', validateObjectIdParam);
 
 function normalizeList(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(String).map((item) => item.trim()).filter(Boolean);
