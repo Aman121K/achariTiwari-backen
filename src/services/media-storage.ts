@@ -1,28 +1,44 @@
-import crypto from 'crypto';
-import path from 'path';
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { v2 as cloudinary, UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
 
-const region = process.env.AWS_REGION || 'ap-south-1';
-const bucket = process.env.AWS_S3_BUCKET || '';
-const client = new S3Client({ region });
+const safePart = (value: string) => value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
 
-const safePart = (value: string) => value.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
-
-export function mediaStorageConfigured() { return Boolean(bucket); }
-
-export async function uploadMedia(file: Express.Multer.File, requestedFolder: string) {
-  if (!bucket) throw new Error('AWS_S3_BUCKET is not configured.');
-  const folder = safePart(requestedFolder || 'general') || 'general';
-  const extension = safePart(path.extname(file.originalname)) || (file.mimetype === 'image/webp' ? '.webp' : '');
-  const base = safePart(path.basename(file.originalname, path.extname(file.originalname))) || 'asset';
-  const key = `media/${folder}/${Date.now()}-${crypto.randomBytes(6).toString('hex')}-${base}${extension}`;
-  await client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: file.buffer, ContentType: file.mimetype, CacheControl: 'public, max-age=31536000, immutable', Metadata: { originalName: encodeURIComponent(file.originalname) } }));
-  const cdn = process.env.AWS_CLOUDFRONT_URL?.replace(/\/$/, '');
-  const url = cdn ? `${cdn}/${key}` : `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
-  return { key, url, folder };
+function configureCloudinary() {
+  // This is intentionally evaluated at request time, after dotenv has loaded.
+  if (!process.env.CLOUDINARY_URL) throw new Error('CLOUDINARY_URL is not configured.');
+  cloudinary.config(true);
 }
 
-export async function deleteMedia(key: string) {
-  if (!bucket) throw new Error('AWS_S3_BUCKET is not configured.');
-  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+export function mediaStorageConfigured() {
+  return Boolean(process.env.CLOUDINARY_URL);
+}
+
+export async function uploadMedia(file: Express.Multer.File, requestedFolder: string) {
+  configureCloudinary();
+  const folder = safePart(requestedFolder || 'general') || 'general';
+
+  const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream({
+      folder: `media/${folder}`,
+      unique_filename: true,
+      overwrite: false,
+      resource_type: 'image',
+      use_filename: true,
+    }, (error?: UploadApiErrorResponse, uploaded?: UploadApiResponse) => {
+      if (error) return reject(error);
+      if (!uploaded) return reject(new Error('Cloudinary did not return an upload result.'));
+      resolve(uploaded);
+    });
+
+    stream.end(file.buffer);
+  });
+
+  return { key: result.public_id, url: result.secure_url, folder };
+}
+
+export async function deleteMedia(publicId: string) {
+  configureCloudinary();
+  const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'image', invalidate: true });
+  if (result.result !== 'ok' && result.result !== 'not found') {
+    throw new Error(`Cloudinary could not delete ${publicId}.`);
+  }
 }
