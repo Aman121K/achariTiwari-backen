@@ -4,6 +4,7 @@ import { authenticate, authorize } from '../middleware/auth';
 import Product from '../models/Product';
 import Category from '../models/Category';
 import { isValidObjectId } from '../middleware/validateObjectId';
+import { queueNewsletterCampaign } from '../services/newsletter';
 
 const router = express.Router();
 
@@ -156,6 +157,7 @@ router.post('/', authenticate, authorize(['admin']), async (req, res, next) => {
       return;
     }
     const product = await Product.create(payload);
+    if (product.status === 'active') await queueNewsletterCampaign('product', product._id).catch(error => console.error('Product newsletter queue failed', error));
     res.status(201).json({ product });
   } catch (error) {
     next(error);
@@ -184,6 +186,7 @@ router.put('/:id', authenticate, authorize(['admin']), async (req, res, next) =>
       return;
     }
 
+    if (product.status === 'active') await queueNewsletterCampaign('product', product._id).catch(error => console.error('Product newsletter queue failed', error));
     res.json({ product });
   } catch (error) {
     next(error);

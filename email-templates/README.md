@@ -8,6 +8,9 @@ Professional responsive HTML email templates for customer lifecycle emails.
 - `order-created.html` - sent after checkout/order creation.
 - `order-delivered.html` - sent when the order has been delivered.
 - `product-review-request.html` - sent after delivery to request a product review.
+- `newsletter-confirmation.html` - confirms newsletter consent before activation.
+- `newsletter-product.html` - announces a newly published product to subscribed contacts.
+- `newsletter-blog.html` - announces a newly published blog story to subscribed contacts.
 
 ## Placeholder Style
 
@@ -20,6 +23,8 @@ These files use the backend's escaped Handlebars-style renderer in `src/services
 {{reviewUrl}}
 {{siteUrl}}
 {{supportEmail}}
+{{confirmationUrl}}
+{{unsubscribeUrl}}
 {{#each items}} ... {{/each}}
 ```
 

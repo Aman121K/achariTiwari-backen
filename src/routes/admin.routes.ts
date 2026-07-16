@@ -8,6 +8,7 @@ import User from '../models/User';
 import Category from '../models/Category';
 import { isValidObjectId, validateObjectIdParam } from '../middleware/validateObjectId';
 import Cart from '../models/Cart';
+import NewsletterSubscriber from '../models/NewsletterSubscriber';
 
 const router = express.Router();
 router.param('id', validateObjectIdParam);
@@ -109,6 +110,38 @@ router.get('/users', async (_req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+router.get('/subscribers', async (req, res, next) => {
+  try {
+    const status = String(req.query.status || 'all');
+    const q = String(req.query.q || '').trim();
+    const filter: Record<string, unknown> = {};
+    if (['pending','subscribed','unsubscribed'].includes(status)) filter.status = status;
+    if (q) filter.$or = [{ email:{ $regex:q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options:'i' } }, { name:{ $regex:q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options:'i' } }];
+    const [subscribers, total, pending, subscribed, unsubscribed] = await Promise.all([
+      NewsletterSubscriber.find(filter).sort({ createdAt:-1 }).limit(500).lean(),
+      NewsletterSubscriber.countDocuments(),
+      NewsletterSubscriber.countDocuments({ status:'pending' }),
+      NewsletterSubscriber.countDocuments({ status:'subscribed' }),
+      NewsletterSubscriber.countDocuments({ status:'unsubscribed' }),
+    ]);
+    return res.json({ subscribers:subscribers.map(subscriber => ({ ...subscriber, source:subscriber.sources.at(-1) || 'footer' })), stats:{ total, pending, subscribed, unsubscribed } });
+  } catch (error) { return next(error); }
+});
+
+router.patch('/subscribers/:id', async (req, res, next) => {
+  try {
+    const status = String(req.body.status || '');
+    if (!['subscribed','unsubscribed'].includes(status)) return res.status(400).json({ error:'Choose subscribed or unsubscribed.' });
+    const subscriber = await NewsletterSubscriber.findById(req.params.id);
+    if (!subscriber) return res.status(404).json({ error:'Subscriber not found.' });
+    subscriber.status = status as 'subscribed' | 'unsubscribed';
+    if (status === 'subscribed') { subscriber.confirmedAt = subscriber.confirmedAt || new Date(); subscriber.unsubscribedAt = undefined; }
+    else subscriber.unsubscribedAt = new Date();
+    await subscriber.save();
+    return res.json({ subscriber });
+  } catch (error) { return next(error); }
 });
 
 router.post('/users', async (req, res, next) => {

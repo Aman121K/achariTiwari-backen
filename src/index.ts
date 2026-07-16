@@ -12,11 +12,14 @@ import adminRoutes from './routes/admin.routes';
 import storeRoutes from './routes/store.routes';
 import { errorHandler } from './middleware/errorHandler';
 import mediaRoutes from './routes/media.routes';
+import newsletterRoutes from './routes/newsletter.routes';
+import { resumeNewsletterCampaigns } from './services/newsletter';
 
 dotenv.config();
 
 const app: Express = express();
 const PORT =  5002;
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
@@ -28,7 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Connect to Database
-connectDB();
+connectDB().then(() => resumeNewsletterCampaigns().catch(error => console.error('Newsletter resume failed', error)));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -40,6 +43,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/store', storeRoutes);
 app.use('/api/admin/media', mediaRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 // Health check
 app.get('/api/health', (_req: Request, res: Response) => {

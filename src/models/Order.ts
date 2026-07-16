@@ -34,6 +34,8 @@ export interface IOrder extends Document {
   };
   trackingNumber?: string;
   notes?: string;
+  marketingAccepted: boolean;
+  marketingAcceptedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -90,6 +92,8 @@ const orderSchema = new Schema<IOrder>(
     },
     trackingNumber: String,
     notes: String,
+    marketingAccepted: { type: Boolean, default: false },
+    marketingAcceptedAt: Date,
   },
   { timestamps: true }
 );

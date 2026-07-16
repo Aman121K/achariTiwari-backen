@@ -1,0 +1,67 @@
+<!--
+Subject: A new story from our pantry: {{blogTitle}}
+Preheader: Settle in for a fresh Achari Tiwari kitchen story, recipe or regional food note.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>{{blogTitle}}</title>
+    <style>
+      @media only screen and (max-width: 620px) {
+        .email-shell { width:100% !important; }
+        .mobile-pad { padding-left:22px !important; padding-right:22px !important; }
+        .headline { font-size:31px !important; line-height:1.15 !important; }
+        .story-image { height:auto !important; }
+        .cta { display:block !important; text-align:center !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0; padding:0; background:#f6efe3; color:#261f18; font-family:Arial, Helvetica, sans-serif;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">Settle in for a fresh Achari Tiwari kitchen story, recipe or regional food note.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#f6efe3;">
+      <tr>
+        <td align="center" style="padding:28px 14px;">
+          <table role="presentation" class="email-shell" width="640" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:640px; background:#fffaf2; border:1px solid #e2d2bc;">
+            <tr>
+              <td class="mobile-pad" style="padding:25px 34px; background:#17320d; border-bottom:4px solid #c88a2b; color:#fffaf2;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="font-family:Georgia, 'Times New Roman', serif; font-size:26px; font-weight:bold;">Achari Tiwari</td><td align="right" style="color:#f0cc8c; font-size:11px; text-transform:uppercase; letter-spacing:1.5px;">Pantry journal</td></tr></table>
+              </td>
+            </tr>
+            {{#if blogImage}}
+            <tr>
+              <td style="background:#eadfcf;"><img class="story-image" src="{{blogImage}}" width="638" alt="Featured image for {{blogTitle}}" style="display:block; width:100%; max-width:638px; height:auto; border:0;"></td>
+            </tr>
+            {{/if}}
+            <tr>
+              <td class="mobile-pad" style="padding:42px 42px 16px;">
+                <p style="margin:0 0 13px; color:#a56412; font-size:12px; line-height:1.4; font-weight:bold; text-transform:uppercase; letter-spacing:1.8px;">{{blogCategory}} &nbsp;·&nbsp; From our kitchen notebook</p>
+                <h1 class="headline" style="margin:0; color:#261f18; font-family:Georgia, 'Times New Roman', serif; font-size:39px; line-height:1.13; font-weight:normal;">{{blogTitle}}</h1>
+                <p style="margin:20px 0 0; color:#625548; font-family:Georgia, 'Times New Roman', serif; font-size:18px; line-height:1.75;">{{blogExcerpt}}</p>
+              </td>
+            </tr>
+            <tr>
+              <td class="mobile-pad" style="padding:20px 42px 43px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td style="background:#8f1715;"><a class="cta" href="{{blogUrl}}" style="display:inline-block; padding:16px 25px; color:#ffffff; font-size:14px; font-weight:bold; text-decoration:none;">Read the full story &rarr;</a></td></tr></table>
+              </td>
+            </tr>
+            <tr>
+              <td class="mobile-pad" style="padding:18px 34px; background:#f5ead9; border-top:1px solid #dfcfb7;">
+                <p style="margin:0; color:#665849; font-size:13px; line-height:1.65;"><strong style="color:#17320d;">A note worth sharing?</strong> Forward this email to someone who enjoys traditional Indian food stories as much as you do.</p>
+              </td>
+            </tr>
+            <tr>
+              <td class="mobile-pad" style="padding:24px 34px; background:#efe2cf; border-top:1px solid #dfcfb7; text-align:center; color:#6c5d4d; font-size:12px; line-height:1.7;">
+                Have a question or a family recipe to share? <a href="mailto:{{supportEmail}}" style="color:#17320d; font-weight:bold;">{{supportEmail}}</a><br>
+                You received this because you subscribed to Achari Tiwari pantry notes.<br>
+                <a href="{{unsubscribeUrl}}" style="color:#8f1715; text-decoration:underline;">Unsubscribe from these emails</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import crypto from 'crypto';
 import { validateObjectIdParam } from '../middleware/validateObjectId';
 import Cart from '../models/Cart';
+import { subscribeToNewsletter } from '../services/newsletter';
 
 const router = express.Router();
 router.param('orderId', validateObjectIdParam);
@@ -33,7 +34,7 @@ const hashGuestToken = (token: string) => crypto.createHash('sha256').update(tok
 // Guest checkout: no account or authentication is required.
 router.post('/', optionalAuthenticate, async (req: AuthRequest, res, next) => {
   try {
-    const { customer, shippingAddress, items, paymentMethod = 'cash_on_delivery', notes = '', cartSessionId } = req.body;
+    const { customer, shippingAddress, items, paymentMethod = 'cash_on_delivery', notes = '', cartSessionId, marketingAccepted = false } = req.body;
     if (!customer?.name || !/^\S+@\S+\.\S+$/.test(customer.email || '') || !customer?.phone) {
       res.status(400).json({ error: 'Valid customer contact details are required.' });
       return;
@@ -89,8 +90,14 @@ router.post('/', optionalAuthenticate, async (req: AuthRequest, res, next) => {
       status: 'pending',
       shippingAddress: { ...shippingAddress, country: shippingAddress.country || 'India' },
       notes,
+      marketingAccepted: marketingAccepted === true,
+      marketingAcceptedAt: marketingAccepted === true ? new Date() : undefined,
     });
     sendOrderConfirmation(order).catch((emailError) => console.error('Order email failed', emailError));
+    if (marketingAccepted === true) {
+      const confirmationBaseUrl = process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}/api`;
+      subscribeToNewsletter({ email:customer.email, name:customer.name, source:'checkout', confirmationBaseUrl }).catch(error => console.error('Checkout newsletter opt-in failed', error));
+    }
     if (typeof cartSessionId === 'string') Cart.deleteOne({ sessionId: cartSessionId }).catch(error => console.error('Converted cart cleanup failed', error));
     res.status(201).json({ order, guestAccessToken });
   } catch (error) {

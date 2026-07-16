@@ -1,0 +1,77 @@
+<!--
+Subject: Fresh from the Achari kitchen: {{productTitle}}
+Preheader: Meet our newest jar, made in small batches and ready for your table.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>{{productTitle}}</title>
+    <style>
+      @media only screen and (max-width: 620px) {
+        .email-shell { width:100% !important; }
+        .mobile-pad { padding-left:22px !important; padding-right:22px !important; }
+        .headline { font-size:31px !important; line-height:1.15 !important; }
+        .product-image { height:auto !important; }
+        .price-cell, .action-cell { display:block !important; width:100% !important; text-align:left !important; }
+        .action-cell { padding-top:18px !important; }
+        .cta-wrapper { width:100% !important; margin:0 !important; float:none !important; }
+        .cta { display:block !important; text-align:center !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0; padding:0; background:#f6efe3; color:#261f18; font-family:Arial, Helvetica, sans-serif;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">Meet our newest jar, made in small batches and ready for your table.</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#f6efe3;">
+      <tr>
+        <td align="center" style="padding:28px 14px;">
+          <table role="presentation" class="email-shell" width="640" cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:640px; background:#fffaf2; border:1px solid #e2d2bc;">
+            <tr>
+              <td class="mobile-pad" style="padding:25px 34px; background:#17320d; border-bottom:4px solid #c88a2b; color:#fffaf2;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td style="font-family:Georgia, 'Times New Roman', serif; font-size:26px; font-weight:bold;">Achari Tiwari</td><td align="right" style="color:#f0cc8c; font-size:11px; text-transform:uppercase; letter-spacing:1.5px;">New from the pantry</td></tr></table>
+              </td>
+            </tr>
+            {{#if productImage}}
+            <tr>
+              <td style="background:#eadfcf;">
+                <img class="product-image" src="{{productImage}}" width="638" alt="{{productTitle}} from Achari Tiwari" style="display:block; width:100%; max-width:638px; height:auto; border:0;">
+              </td>
+            </tr>
+            {{/if}}
+            <tr>
+              <td class="mobile-pad" style="padding:42px 42px 18px;">
+                <p style="margin:0 0 12px; color:#a56412; font-size:12px; line-height:1.4; font-weight:bold; text-transform:uppercase; letter-spacing:1.8px;">A fresh jar has arrived</p>
+                <h1 class="headline" style="margin:0; color:#261f18; font-family:Georgia, 'Times New Roman', serif; font-size:39px; line-height:1.13; font-weight:normal;">{{productTitle}}</h1>
+                <p style="margin:20px 0 0; color:#625548; font-size:16px; line-height:1.75;">{{productDescription}}</p>
+              </td>
+            </tr>
+            <tr>
+              <td class="mobile-pad" style="padding:18px 42px 42px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top:1px solid #dfcfb7; border-bottom:1px solid #dfcfb7;">
+                  <tr>
+                    <td class="price-cell" style="padding:20px 0;">
+                      <span style="display:block; margin-bottom:4px; color:#897766; font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:1.4px;">From the pantry</span>
+                      <strong style="color:#17320d; font-family:Georgia, 'Times New Roman', serif; font-size:26px;">{{productPrice}}</strong>
+                    </td>
+                    <td class="action-cell" align="right" style="padding:20px 0;">
+                      <table role="presentation" class="cta-wrapper" cellspacing="0" cellpadding="0" border="0" align="right"><tr><td style="background:#8f1715;"><a class="cta" href="{{productUrl}}" style="display:inline-block; padding:15px 24px; color:#ffffff; font-size:14px; font-weight:bold; text-decoration:none;">Explore this jar &rarr;</a></td></tr></table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="mobile-pad" style="padding:24px 34px; background:#efe2cf; border-top:1px solid #dfcfb7; text-align:center; color:#6c5d4d; font-size:12px; line-height:1.7;">
+                Questions about this batch? <a href="mailto:{{supportEmail}}" style="color:#17320d; font-weight:bold;">{{supportEmail}}</a><br>
+                You received this because you subscribed to Achari Tiwari pantry notes.<br>
+                <a href="{{unsubscribeUrl}}" style="color:#8f1715; text-decoration:underline;">Unsubscribe from these emails</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

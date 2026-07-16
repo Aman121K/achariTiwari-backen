@@ -1,8 +1,8 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import nodemailer from 'nodemailer';
+import nodemailer, { Transporter } from 'nodemailer';
 
-type TemplateName = 'welcome' | 'order-created' | 'order-delivered' | 'product-review-request';
+type TemplateName = 'welcome' | 'order-created' | 'order-delivered' | 'product-review-request' | 'newsletter-confirmation' | 'newsletter-product' | 'newsletter-blog';
 type TemplateData = Record<string, unknown>;
 
 const templateDirectory = path.resolve(__dirname, '../../email-templates');
@@ -24,17 +24,28 @@ async function loadTemplate(name: TemplateName, data: TemplateData) {
   return { subject: renderBlock(subject, data), html: renderBlock(source.replace(/^<!--[\s\S]*?-->\s*/, ''), data) };
 }
 
+let cachedTransporter: Transporter | null | undefined;
+
 function transporter() {
+  if (cachedTransporter !== undefined) return cachedTransporter;
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD) return null;
-  return nodemailer.createTransport({ host:SMTP_HOST, port:Number(SMTP_PORT || 587), secure:Number(SMTP_PORT) === 465, auth:{ user:SMTP_USER, pass:SMTP_PASSWORD } });
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASSWORD) return cachedTransporter = null;
+  cachedTransporter = nodemailer.createTransport({ host:SMTP_HOST, port:Number(SMTP_PORT || 587), secure:Number(SMTP_PORT) === 465, auth:{ user:SMTP_USER, pass:SMTP_PASSWORD } });
+  return cachedTransporter;
 }
 
-async function sendTemplate(to: string, name: TemplateName, data: TemplateData, text: string) {
+async function sendTemplate(to: string, name: TemplateName, data: TemplateData, text: string, options: { unsubscribeUrl?: string } = {}) {
   const mailer = transporter();
   if (!mailer) { console.warn(`Email "${name}" skipped for ${to}: SMTP is not configured.`); return false; }
   const rendered = await loadTemplate(name, { supportEmail:process.env.SUPPORT_EMAIL || 'aacharitiwari@gmail.com', siteUrl:process.env.SITE_URL || 'https://www.aacharitiwari.com', ...data });
-  await mailer.sendMail({ from:process.env.EMAIL_FROM || `Achari Tiwari <${process.env.SMTP_USER}>`, to, subject:rendered.subject, text, html:rendered.html });
+  await mailer.sendMail({
+    from:process.env.EMAIL_FROM || `Achari Tiwari <${process.env.SMTP_USER}>`,
+    to,
+    subject:rendered.subject,
+    text,
+    html:rendered.html,
+    ...(options.unsubscribeUrl ? { headers: { 'List-Unsubscribe': `<${options.unsubscribeUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' } } : {}),
+  });
   return true;
 }
 
@@ -56,4 +67,16 @@ export function sendOrderDeliveredEmail(order: any) {
 export function sendProductReviewRequest(order: any) {
   const items = orderItems(order);
   return sendTemplate(order.customer.email, 'product-review-request', { customerName:order.customer.name, items, reviewUrl:items[0]?.reviewUrl || `${process.env.SITE_URL || 'https://www.aacharitiwari.com'}/products` }, `How was your Achari Tiwari order ${order.orderNumber}? We would love your feedback.`);
+}
+
+export function sendNewsletterConfirmation(to: string, confirmationUrl: string) {
+  return sendTemplate(to, 'newsletter-confirmation', { confirmationUrl }, `Confirm your Achari Tiwari newsletter subscription: ${confirmationUrl}`);
+}
+
+export function sendNewsletterProduct(to: string, product: { title:string; description:string; image?:string; price:string; url:string }, unsubscribeUrl: string) {
+  return sendTemplate(to, 'newsletter-product', { productTitle:product.title, productDescription:product.description, productImage:product.image, productPrice:product.price, productUrl:product.url, unsubscribeUrl }, `New from Achari Tiwari: ${product.title}. Explore it at ${product.url}. Unsubscribe: ${unsubscribeUrl}`, { unsubscribeUrl });
+}
+
+export function sendNewsletterBlog(to: string, post: { title:string; excerpt:string; image?:string; category:string; url:string }, unsubscribeUrl: string) {
+  return sendTemplate(to, 'newsletter-blog', { blogTitle:post.title, blogExcerpt:post.excerpt, blogImage:post.image, blogCategory:post.category, blogUrl:post.url, unsubscribeUrl }, `New from the Achari Tiwari kitchen: ${post.title}. Read it at ${post.url}. Unsubscribe: ${unsubscribeUrl}`, { unsubscribeUrl });
 }
