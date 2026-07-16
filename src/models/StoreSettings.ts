@@ -1,5 +1,16 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export type PageSeoSettings = {
+  title: string;
+  description: string;
+  keywords?: string[];
+  canonical?: string;
+  robots?: 'index,follow' | 'noindex,follow' | 'index,nofollow' | 'noindex,nofollow';
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+};
+
 export interface IStoreSettings extends Document {
   key: string;
   storeName: string;
@@ -11,7 +22,7 @@ export interface IStoreSettings extends Document {
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string[];
-  pageSeo: Record<string, { title: string; description: string }>;
+  pageSeo: Record<string, PageSeoSettings>;
   termsContent: string;
   privacyContent: string;
   refundContent: string;
@@ -33,7 +44,7 @@ const schema = new Schema<IStoreSettings>({
   seoKeywords: { type: [String], default: ['Indian pickle', 'aachar online', 'homemade pickle'] },
   pageSeo: { type: Schema.Types.Mixed, default: {} },
   termsContent: { type: String, default: 'These terms govern purchases made from Achari Tiwari. Product availability, pricing and delivery estimates may change.' },
-  privacyContent: { type: String, default: 'We collect only the information needed to process orders, provide support and improve our services.' },
+  privacyContent: { type: String, default: 'We collect only the information needed to process orders, provide support and improve our services. Optional Firebase Analytics and Google Analytics 4 measurement remains disabled until a visitor accepts analytics. Analytics events are designed not to include names, email addresses, phone numbers, delivery addresses or form messages, and visitors can change their choice from the website footer.' },
   refundContent: { type: String, default: 'Contact support within 7 days for damaged, incorrect or quality-affected orders. Include your order number and photographs.' },
   shippingContent: { type: String, default: 'Orders are carefully packed and normally delivered within 2–5 business days, depending on the destination.' },
   acceptedPayments: { type: [String], enum: ['cod', 'upi'], default: ['cod', 'upi'] },
