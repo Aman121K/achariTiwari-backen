@@ -89,11 +89,47 @@ router.get('/', async (req, res, next) => {
     const filter: Record<string, unknown> = {};
 
     if (status) filter.status = status;
-    if (category) filter.category = category;
+    if (category) {
+      const requestedCategory = String(category).trim();
+      const matchedCategory = mongoose.Types.ObjectId.isValid(requestedCategory)
+        ? await Category.findOne({ _id: requestedCategory, isActive: true }).select('_id')
+        : await Category.findOne({ slug: requestedCategory.toLowerCase(), isActive: true }).select('_id');
+      if (!matchedCategory) {
+        res.json({ products: [] });
+        return;
+      }
+      filter.category = matchedCategory._id;
+    }
     if (q) filter.$text = { $search: String(q) };
 
     const products = await Product.find(filter).populate('category subCategory').sort({ createdAt: -1 });
     res.json({ products });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/categories', async (_req, res, next) => {
+  try {
+    const [categories, productCounts] = await Promise.all([
+      Category.find({ isActive: true, parentCategory: null }).sort({ name: 1 }).lean(),
+      Product.aggregate<{ _id: mongoose.Types.ObjectId; productCount: number }>([
+        { $match: { status: 'active' } },
+        { $group: { _id: '$category', productCount: { $sum: 1 } } },
+      ]),
+    ]);
+    const countByCategory = new Map(productCounts.map((item) => [String(item._id), item.productCount]));
+    res.json({
+      categories: categories.map((category) => ({
+        _id: category._id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        image: category.image,
+        icon: category.icon,
+        productCount: countByCategory.get(String(category._id)) || 0,
+      })),
+    });
   } catch (error) {
     next(error);
   }
