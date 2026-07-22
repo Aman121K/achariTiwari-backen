@@ -35,6 +35,27 @@ export async function uploadMedia(file: Express.Multer.File, requestedFolder: st
   return { key: result.public_id, url: result.secure_url, folder };
 }
 
+export async function uploadMediaBuffer(buffer: Buffer, requestedFolder: string, filename: string) {
+  configureCloudinary();
+  const folder = safePart(requestedFolder || 'general') || 'general';
+  const publicId = safePart(filename.replace(/\.[^.]+$/, '')) || `generated-${Date.now()}`;
+  const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream({
+      folder: `media/${folder}`,
+      public_id: publicId,
+      unique_filename: true,
+      overwrite: false,
+      resource_type: 'image',
+    }, (error?: UploadApiErrorResponse, uploaded?: UploadApiResponse) => {
+      if (error) return reject(error);
+      if (!uploaded) return reject(new Error('Cloudinary did not return an upload result.'));
+      resolve(uploaded);
+    });
+    stream.end(buffer);
+  });
+  return { key: result.public_id, url: result.secure_url, folder };
+}
+
 export async function deleteMedia(publicId: string) {
   configureCloudinary();
   const result = await cloudinary.uploader.destroy(publicId, { resource_type: 'image', invalidate: true });

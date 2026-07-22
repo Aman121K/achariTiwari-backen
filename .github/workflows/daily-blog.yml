@@ -1,0 +1,28 @@
+name: Generate daily AchariTiwari blog
+
+on:
+  schedule:
+    # Check hourly; the backend runs only at the UTC hour selected in admin.
+    - cron: '5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: daily-acharitiwari-blog
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger protected blog automation endpoint
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          test -n "$API_BASE_URL" || { echo "Missing API_BASE_URL secret"; exit 1; }
+          test -n "$CRON_SECRET" || { echo "Missing CRON_SECRET secret"; exit 1; }
+          curl --fail-with-body --show-error --silent \
+            --retry 2 --retry-all-errors --max-time 900 \
+            -X POST "${API_BASE_URL%/}/api/blog/automation/cron" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Content-Type: application/json"
