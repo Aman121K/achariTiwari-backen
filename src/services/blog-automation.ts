@@ -74,6 +74,25 @@ function scoreArticle(article: GeneratedArticle) {
   return { score, wordCount };
 }
 
+function qualityFeedback(article: GeneratedArticle) {
+  const { score, wordCount } = scoreArticle(article);
+  const text = stripHtml(article.content).toLowerCase();
+  const keyword = article.focusKeyword.toLowerCase();
+  const density = text.split(keyword).length - 1;
+  const required = ['table of contents','ingredients','pairing','storage','frequently asked','conclusion'];
+  const missing: string[] = [];
+  if (wordCount < 1000 || wordCount > 2200) missing.push(`content length is ${wordCount} words; it must be 1000-2200`);
+  if (article.seoTitle.length < 35 || article.seoTitle.length > 65) missing.push(`SEO title is ${article.seoTitle.length} characters; it must be 35-65`);
+  if (article.seoDescription.length < 120 || article.seoDescription.length > 165) missing.push(`SEO description is ${article.seoDescription.length} characters; it must be 120-165`);
+  const missingSections = required.filter(item => !text.includes(item));
+  if (missingSections.length > 1) missing.push(`include exact, substantive sections for: ${missingSections.join(', ')}`);
+  if (article.faq.length < 4) missing.push('include at least 4 FAQ entries in the structured FAQ field');
+  if (density < 2 || density > Math.max(10, Math.ceil(wordCount * .02))) missing.push(`use the exact focus keyword naturally 2-${Math.max(10, Math.ceil(wordCount * .02))} times (currently ${density})`);
+  const missingProducts = PRODUCTS.filter(product => !text.includes(product.name.toLowerCase())).map(product => product.name);
+  if (missingProducts.length) missing.push(`naturally mention: ${missingProducts.join(', ')}`);
+  return { score, details: missing.join('; ') || 'improve the draft against every stated quality requirement' };
+}
+
 async function histories() {
   const posts = await BlogPost.find().select('title slug focusKeyword secondaryKeywords automation.topic').sort({ createdAt: -1 }).limit(500).lean();
   return {
@@ -102,12 +121,12 @@ async function generateArticle(existing?: IBlogPost): Promise<{ article: Generat
   const contentType = existing?.automation?.contentType || CONTENT_TYPES[Math.floor(Math.random() * CONTENT_TYPES.length)];
   const season = seasonFor();
   const topic = existing?.automation?.topic || `${contentType}: ${hero.name} for ${season}`;
-  const prompt = `Create one original AchariTiwari SEO article.\nPrimary product: ${hero.name} (natural emphasis only).\nSeason: ${season}. Content type: ${contentType}.\nAudience: Indian families, food lovers, students, working professionals and NRIs, especially UP, Bihar, Jharkhand and West Bengal.\nAvoid these existing topics: ${history.topics.slice(0,80).join(' | ')}\nAvoid these slugs: ${history.slugs.slice(0,100).join(', ')}\nAvoid these focus keywords: ${history.keywords.slice(0,100).join(', ')}\n\nRequirements: 1200-2000 words, minimum 1000. Human editorial voice with specific sensory and cultural detail; never generic, robotic or salesy. Include an interesting hook, traditional story, why the pickle is special, taste experience, seasonal relevance, authentic ingredients, food pairings, storage tips, serving suggestions, conclusion and subtle CTA. Include a linked table of contents. Use semantic HTML only for content (h2/h3/p/ul/ol/a), no document/body tags. Naturally mention and recommend Bharwa Lal Mirchi Pickle, Mango Pickle and Garlic Pickle. Never make medical claims; use cautious food-language only. The image prompt must request ultra-premium realistic luxury food photography in a rustic Indian kitchen, earthen pot, wooden table, natural light, mustard oil and traditional masala, editorial style, no text, no watermark. Slug must be lowercase ASCII kebab-case. SEO title max 65 chars; description 120-165 chars.`;
+  const prompt = `Create one original AchariTiwari SEO article.\nPrimary product: ${hero.name} (natural emphasis only).\nSeason: ${season}. Content type: ${contentType}.\nAudience: Indian families, food lovers, students, working professionals and NRIs, especially UP, Bihar, Jharkhand and West Bengal.\nAvoid these existing topics: ${history.topics.slice(0,80).join(' | ')}\nAvoid these slugs: ${history.slugs.slice(0,100).join(', ')}\nAvoid these focus keywords: ${history.keywords.slice(0,100).join(', ')}\n\nRequirements: 1200-2000 words, minimum 1000. Human editorial voice with specific sensory and cultural detail; never generic, robotic or salesy. Include an interesting hook and substantive sections whose headings contain these exact phrases: Table of Contents, Ingredients, Pairing, Storage, Frequently Asked Questions, and Conclusion. Also cover a traditional story, why the pickle is special, taste experience, seasonal relevance, serving suggestions and a subtle CTA. The content FAQ section and the structured FAQ field must both be useful and consistent. Use semantic HTML only for content (h2/h3/p/ul/ol/a), no document/body tags. Choose an exact focus keyword phrase and use it naturally at least twice. Naturally mention and recommend Bharwa Lal Mirchi Pickle, Mango Pickle and Garlic Pickle. Never make medical claims; use cautious food-language only. The image prompt must request ultra-premium realistic luxury food photography in a rustic Indian kitchen, earthen pot, wooden table, natural light, mustard oil and traditional masala, editorial style, no text, no watermark. Slug must be lowercase ASCII kebab-case. SEO title must be 35-65 chars; description 120-165 chars.`;
   let last: GeneratedArticle | undefined;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const response: any = await client().interactions.create({
       model: process.env.GEMINI_TEXT_MODEL || 'gemini-3.6-flash',
-      input: `You are an expert Indian food editor and technical SEO strategist. Return only schema-valid data. Preserve factual caution and a natural human voice.\n\n${attempt ? `${prompt}\nPrevious draft failed quality checks. Rewrite with complete required sections and 1200-2000 words.` : prompt}`,
+      input: `You are an expert Indian food editor and technical SEO strategist. Return only schema-valid data. Preserve factual caution and a natural human voice.\n\n${attempt && last ? `${prompt}\nThe previous draft scored ${qualityFeedback(last).score}/100. Rewrite it completely and fix all of these issues: ${qualityFeedback(last).details}.` : prompt}`,
       response_format: { type:'text', mime_type:'application/json', schema:articleSchema },
     });
     if (!response.output_text) throw new Error('Gemini returned no article text.');
@@ -131,11 +150,11 @@ async function generateImage(article: Pick<GeneratedArticle,'imagePrompt'|'slug'
   const result: any = await client().interactions.create({
     model: process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-lite-image',
     input: article.imagePrompt,
-    response_format: { type:'image', mime_type:'image/png', aspect_ratio:'3:2', image_size:'1K' },
+    response_format: { type:'image', mime_type:'image/jpeg', aspect_ratio:'3:2', image_size:'1K' },
   });
   const encoded = result.output_image?.data;
   if (!encoded) throw new Error('Gemini returned no generated image data. Confirm billing and image-model access.');
-  return (await uploadMediaBuffer(Buffer.from(encoded, 'base64'), 'blogs', `${article.slug}.png`)).url;
+  return (await uploadMediaBuffer(Buffer.from(encoded, 'base64'), 'blogs', `${article.slug}.jpg`)).url;
 }
 
 function schemaMarkup(article: GeneratedArticle, coverImage: string, publishedAt: Date) {
